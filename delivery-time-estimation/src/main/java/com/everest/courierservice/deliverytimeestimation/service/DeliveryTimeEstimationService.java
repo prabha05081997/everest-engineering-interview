@@ -1,5 +1,6 @@
 package com.everest.courierservice.deliverytimeestimation.service;
 
+import com.everest.courierservice.core.exception.ServiceException;
 import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.model.Vehicle;
 import com.everest.courierservice.core.model.VehicleAssignmentDetails;
@@ -40,7 +41,7 @@ public class DeliveryTimeEstimationService {
      * @return - List of Package info object with delivery time and vehicle info updated
      *
      */
-    public List<PackageInfo> findDeliveryTimeEstimationForCourierService(List<PackageInfo> packageInfoList, int noOfVehicles, Vehicle vehicle) {
+    public List<PackageInfo> findDeliveryTimeEstimationForCourierService(List<PackageInfo> packageInfoList, int noOfVehicles, Vehicle vehicle) throws Exception {
         log.info("in findDeliveryTimeEstimationForCourierService packageInfoList {} noOfVehicles {} vehicle {}",
                 packageInfoList, noOfVehicles, vehicle);
         List<VehicleAssignmentDetails> vehicleAssignmentDetailsList = getVehicleAssignmentDetails(noOfVehicles);
@@ -57,7 +58,7 @@ public class DeliveryTimeEstimationService {
      * @return - List of Package info object with delivery time and vehicle info updated
      *
      */
-    private List<PackageInfo> assignVehiclesToPackages(List<VehicleAssignmentDetails> vehicleAssignmentDetailsList, List<PackageInfo> packageInfoList, Vehicle vehicle) {
+    private List<PackageInfo> assignVehiclesToPackages(List<VehicleAssignmentDetails> vehicleAssignmentDetailsList, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
         // running infinite loop until all the packages been delivered
         while(true) {
             List<PackageInfo> packageInfoListForVehicleAssigned = packageInfoList.stream().filter(packageInfo -> !packageInfo.isVehicleAssigned()).collect(Collectors.toList());
@@ -91,7 +92,7 @@ public class DeliveryTimeEstimationService {
      * @return - List of Package info object with delivery time and vehicle info updated
      *
      */
-    private List<PackageInfo> assignVehiclesToPackages(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> packageInfoList, Vehicle vehicle) {
+    private List<PackageInfo> assignVehiclesToPackages(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
         log.info("in assignVehiclesToPackages vehicleAssignmentDetails {} packageInfoList {} vehicle {}", vehicleAssignmentDetails, packageInfoList, vehicle);
         int maxWeightAssignableToVehicleInKg = 0;
         double maxSpeedInKmPerHr = vehicle.getMaxSpeedInKmPerHr();
@@ -105,6 +106,11 @@ public class DeliveryTimeEstimationService {
         log.info("unassignedWeights {}", unassignedWeights);
         List<Integer> maxUnassignedWeights = MaxWeightService.getInstance().findMaxWeights(unassignedWeights, vehicle.getMaxCarriableWeightInKg());
         log.info("maxUnassignedWeights {}", maxUnassignedWeights);
+
+        if(maxUnassignedWeights.isEmpty()) {
+            log.error("max weight can't find from the given weights");
+            throw new ServiceException("max weight can't find from the given weights");
+        }
 
         // update vehicle info and weight details in package info object
         for(PackageInfo packageInfo : packageInfoList) {
