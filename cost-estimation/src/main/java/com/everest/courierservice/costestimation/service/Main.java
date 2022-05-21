@@ -18,8 +18,7 @@ public class Main {
         log.info("couponMap {}", couponMap);
 
         List<PackageInfo> packageInfoList = new ArrayList<>();
-        int baseDeliveryCost = 100;
-        int noOfPackages = 3;
+        int baseDeliveryCost = 0, noOfPackages = 0;
 
         try {
             Scanner scanner = new Scanner(System.in);
@@ -47,6 +46,7 @@ public class Main {
 
         try {
             List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
+            log.info("===============================================================================================");
             for (PackageInfo packageInfo : packageInfoResultList) {
                 log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost());
             }

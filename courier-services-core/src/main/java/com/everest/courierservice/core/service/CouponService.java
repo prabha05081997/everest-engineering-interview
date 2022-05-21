@@ -12,7 +12,12 @@ public class CouponService {
 
     static Map<String, Coupon> couponMap;
 
-    // initializing the coupons in static block
+    /**
+     *
+     * initializing the coupons in static block
+     * It can be easily extended by adding new coupon without touching the existing coupons
+     *
+     */
     static {
         List<Coupon> couponList = new ArrayList<>();
         couponList.add(new Coupon("OFR001", 10, 0, 200, 70, 200));

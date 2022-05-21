@@ -62,6 +62,7 @@ public class Main {
                 log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
             }
             packageInfoResultList = DeliveryTimeEstimationService.getInstance().findDeliveryTimeEstimationForCourierService(packageInfoResultList, noOfVehicles, vehicle);
+            log.info("===============================================================================================");
             for(PackageInfo packageInfo : packageInfoResultList) {
                 log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
             }
