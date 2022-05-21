@@ -1,12 +1,11 @@
 package com.everest.courierservice.costestimation.service;
 
+import com.everest.courierservice.core.exception.ExceptionController;
 import com.everest.courierservice.core.model.Coupon;
 import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.service.CouponService;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +18,6 @@ public class Main {
         log.info("couponMap {}", couponMap);
 
         List<PackageInfo> packageInfoList = new ArrayList<>();
-//        packageInfoList.add(new PackageInfo("PKG1", 5, 5, "OFR001"));
-//        packageInfoList.add(new PackageInfo("PKG2", 15, 5, "OFR002"));
-//        packageInfoList.add(new PackageInfo("PKG3", 10, 100, "OFR003"));
         int baseDeliveryCost = 100;
         int noOfPackages = 3;
 
@@ -46,12 +42,16 @@ public class Main {
             System.exit(0);
         }
 
-        log.info("input readed succesfully packageInfoList {}", packageInfoList);
-        List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
+        log.info("input readed succesfully baseDeliveryCost {} noOfPackages {} packageInfoList {}",
+                baseDeliveryCost, noOfPackages, packageInfoList);
 
-        for(PackageInfo packageInfo : packageInfoResultList) {
-            log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost());
+        try {
+            List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
+            for (PackageInfo packageInfo : packageInfoResultList) {
+                log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost());
+            }
+        }catch (Exception e) {
+            log.error("error occurred [{}]", ExceptionController.getErrorResponse(e));
         }
-
     }
 }

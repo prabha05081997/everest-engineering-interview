@@ -1,9 +1,11 @@
 package com.everest.courierservice.deliverytimeestimation.service;
 
+import com.everest.courierservice.core.exception.ExceptionController;
 import com.everest.courierservice.core.model.Coupon;
 import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.model.Vehicle;
 import com.everest.courierservice.core.service.CouponService;
+import com.everest.courierservice.core.service.ValidationService;
 import com.everest.courierservice.costestimation.service.CostEstimationService;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,16 +22,7 @@ public class Main {
         log.info("couponMap {}", couponMap);
 
         List<PackageInfo> packageInfoList = new ArrayList<>();
-//        packageInfoList.add(new PackageInfo("PKG1", 50, 30, "OFR001"));
-//        packageInfoList.add(new PackageInfo("PKG2", 75, 125, "OFR0008"));
-//        packageInfoList.add(new PackageInfo("PKG3", 175, 100, "OFR003"));
-//        packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002"));
-//        packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA"));
-        int baseDeliveryCost = 100;
-        int noOfPackages = 5;
-        int noOfVehicles = 2;
-        int maxSpeed = 70;
-        int maxCarriableWeight = 200;
+        int baseDeliveryCost = 0, noOfPackages = 0, noOfVehicles = 0, maxSpeed = 0, maxCarriableWeight = 0;
         try {
             Scanner scanner = new Scanner(System.in);
             baseDeliveryCost = Integer.parseInt(scanner.next());
@@ -57,16 +50,23 @@ public class Main {
         }
 
         Vehicle vehicle = new Vehicle(maxSpeed, maxCarriableWeight);
-        log.info("input readed succesfully packageInfoList {}", packageInfoList);
+        log.info("input readed succesfully baseDeliveryCost {} noOfPackages {} noOfVehicles {} packageInfoList {} vehicle {}",
+                baseDeliveryCost, noOfPackages, noOfVehicles, packageInfoList, vehicle);
 
-        List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
-        for(PackageInfo packageInfo : packageInfoResultList) {
-            log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
-        }
-        packageInfoResultList = DeliveryTimeEstimationService.getInstance().findDeliveryTimeEstimationForCourierService(packageInfoResultList, noOfVehicles, vehicle);
+        try {
+            ValidationService.getInstance().validateInputs(packageInfoList, vehicle, noOfVehicles, baseDeliveryCost, noOfPackages);
 
-        for(PackageInfo packageInfo : packageInfoResultList) {
-            log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
+            // calling cost estimation service to calculate the costs
+            List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
+            for(PackageInfo packageInfo : packageInfoResultList) {
+                log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
+            }
+            packageInfoResultList = DeliveryTimeEstimationService.getInstance().findDeliveryTimeEstimationForCourierService(packageInfoResultList, noOfVehicles, vehicle);
+            for(PackageInfo packageInfo : packageInfoResultList) {
+                log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
+            }
+        } catch (Exception e) {
+            log.error("error occurred [{}]", ExceptionController.getErrorResponse(e));
         }
     }
 }

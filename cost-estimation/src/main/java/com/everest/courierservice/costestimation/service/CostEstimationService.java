@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import com.everest.courierservice.core.model.PackageInfo;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -31,6 +30,17 @@ public class CostEstimationService {
         return costEstimationService;
     }
 
+    /**
+     *
+     * This method is used for estimating the cost for each package
+     *
+     * @param packageInfoList - List of Object to track package info
+     * @param baseDeliveryCost - base delivery cost
+     * @param noOfPackages - total no of packages
+     * @param couponMap - coupon list
+     * @return - List of Package info object with estimation cost updated
+     *
+     */
     public List<PackageInfo> findCostEstimationForCourierService(List<PackageInfo> packageInfoList, int baseDeliveryCost, int noOfPackages, Map<String, Coupon> couponMap) {
         log.info("in findCostEstimationForCourierService packageInfoList {} baseDeliveryCost {} noOfPackages {} couponMap {}",
                 packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
@@ -56,7 +66,16 @@ public class CostEstimationService {
         return packageInfoList;
     }
 
-    public boolean checkIfPackageEligibleForDiscount(PackageInfo packageInfo, Map<String, Coupon> couponMap) {
+    /**
+     *
+     * This method will check for the eligibility for discount for the given coupon code
+     *
+     * @param packageInfo - package info
+     * @param couponMap - coupon list
+     * @return - boolean value to indicate the elgibility for discount
+     *
+     */
+    private boolean checkIfPackageEligibleForDiscount(PackageInfo packageInfo, Map<String, Coupon> couponMap) {
         String offerCode = packageInfo.getOfferCode();
         Coupon coupon = couponMap.getOrDefault(offerCode, null);
         if(coupon == null) return Boolean.FALSE;

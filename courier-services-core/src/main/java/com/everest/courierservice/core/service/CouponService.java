@@ -12,6 +12,7 @@ public class CouponService {
 
     static Map<String, Coupon> couponMap;
 
+    // initializing the coupons in static block
     static {
         List<Coupon> couponList = new ArrayList<>();
         couponList.add(new Coupon("OFR001", 10, 0, 200, 70, 200));

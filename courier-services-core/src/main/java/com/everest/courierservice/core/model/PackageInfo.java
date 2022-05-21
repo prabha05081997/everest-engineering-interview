@@ -11,6 +11,7 @@ public class PackageInfo {
     private int packageDistanceInKm;
     private String offerCode;
 
+    // vehicle parameters
     private boolean isVehicleAssigned;
     private int vehicleNoAssigned;
 
