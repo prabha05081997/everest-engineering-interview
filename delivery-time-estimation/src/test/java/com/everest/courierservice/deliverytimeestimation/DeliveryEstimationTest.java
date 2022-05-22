@@ -116,4 +116,19 @@ public class DeliveryEstimationTest {
         assertEquals(expectedVehicleCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);
     }
 
+    @Test
+    public void testIfAllPackagesDelivered() {
+
+        List<PackageInfo> packageInfoList = new ArrayList<>();
+        packageInfoList.add(new PackageInfo("PKG1", 50, 30, "OFR001", Boolean.TRUE));
+        packageInfoList.add(new PackageInfo("PKG2", 75, 125, "OFR008", Boolean.TRUE));
+        packageInfoList.add(new PackageInfo("PKG3", 175, 100, "OFR003", Boolean.TRUE));
+
+        assertEquals(Boolean.TRUE, DeliveryTimeEstimationService.getInstance().checkIfAllPackagesAreDelivered(packageInfoList));
+
+        packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002", Boolean.FALSE));
+        packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA", Boolean.TRUE));
+
+        assertEquals(Boolean.FALSE, DeliveryTimeEstimationService.getInstance().checkIfAllPackagesAreDelivered(packageInfoList));
+    }
 }

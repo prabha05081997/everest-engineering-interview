@@ -61,11 +61,12 @@ public class DeliveryTimeEstimationService {
     public List<PackageInfo> assignVehiclesToPackages(List<VehicleAssignmentDetails> vehicleAssignmentDetailsList, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
         // running infinite loop until all the packages been delivered
         while(true) {
-            List<PackageInfo> packageInfoListForVehicleAssigned = packageInfoList.stream().filter(packageInfo -> !packageInfo.isVehicleAssigned()).collect(Collectors.toList());
-            if (packageInfoListForVehicleAssigned.size() == 0) {
+            boolean isAllPackagesDelivered = checkIfAllPackagesAreDelivered(packageInfoList);
+            if (isAllPackagesDelivered) {
                 log.info("vehicles assigned for all the packages");
                 break;
             }
+
             // sorting the list based on availablity time for vehicles
             vehicleAssignmentDetailsList = vehicleAssignmentDetailsList.stream()
                     .sorted(Comparator.comparing(VehicleAssignmentDetails::getTotalDeliveryTime))
@@ -87,13 +88,19 @@ public class DeliveryTimeEstimationService {
      * 2) if weight is same package which can be delivered first should process first
      *
      * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
-     * @param packageInfoList - Object to track package info
+     * @param packageInfoList - List of Objects to track package info
      * @param vehicle - Object to track vehicle info
      * @return - List of Package info object with delivery time and vehicle info updated
      *
      */
     public List<PackageInfo> assignVehicleToPackages(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
         log.info("in assignVehiclesToPackages vehicleAssignmentDetails {} packageInfoList {} vehicle {}", vehicleAssignmentDetails, packageInfoList, vehicle);
+        // check if all the packages are delivered before start assigning vehicles
+        boolean isAllPackagesDelivered = checkIfAllPackagesAreDelivered(packageInfoList);
+        if (isAllPackagesDelivered) {
+            log.info("vehicles assigned for all the packages");
+            return packageInfoList;
+        }
         int maxWeightAssignableToVehicleInKg = 0;
         double maxSpeedInKmPerHr = vehicle.getMaxSpeedInKmPerHr();
         List<PackageInfo> vehicleAssignmentPackageInfoList = new ArrayList<>();
@@ -107,6 +114,7 @@ public class DeliveryTimeEstimationService {
         List<Integer> maxUnassignedWeights = MaxWeightService.getInstance().findMaxWeights(unassignedWeights, vehicle.getMaxCarriableWeightInKg());
         log.info("maxUnassignedWeights {}", maxUnassignedWeights);
 
+        // fail safe mechanism - check if the weights are empty, and throw exception to avoid infinite loop
         if(maxUnassignedWeights.isEmpty()) {
             log.error("max weight can't find from the given weights");
             throw new ServiceException("max weight can't find from the given weights");
@@ -114,18 +122,24 @@ public class DeliveryTimeEstimationService {
 
         // update vehicle info and weight details in package info object
         for(PackageInfo packageInfo : packageInfoList) {
-            if(maxUnassignedWeights.contains(packageInfo.getPackageWeightInKg())) {
-                List<PackageInfo> tmpPackageInfoList = packageInfoList.stream().filter(packageInfo1 -> packageInfo1.getPackageWeightInKg() == packageInfo.getPackageWeightInKg()).collect(Collectors.toList());
+            if(maxUnassignedWeights.contains(packageInfo.getPackageWeightInKg()) && packageInfo.isVehicleAssigned() == Boolean.FALSE) {
+                log.info("packageInfo inside vehicle assignment {}", packageInfo);
+                List<PackageInfo> tmpPackageInfoList = packageInfoList.stream().filter(packageInfo1 ->
+                        (packageInfo1.getPackageWeightInKg() == packageInfo.getPackageWeightInKg()) && (packageInfo1.isVehicleAssigned() == Boolean.FALSE)).collect(Collectors.toList());
                 if(tmpPackageInfoList.size() > 0) {
                     // if weights are same, assign vehicle to the package which can be delivered first
                     PackageInfo tmpPackageInfo = tmpPackageInfoList.stream().min(Comparator.comparing(PackageInfo::getPackageDistanceInKm))
                             .get();
-                    if(tmpPackageInfo.getPackageDistanceInKm() != packageInfo.getPackageDistanceInKm()) continue;
+                    if(tmpPackageInfo.getPackageDistanceInKm() != packageInfo.getPackageDistanceInKm()) {
+                        vehicleAssignmentPackageInfoList.add(packageInfo);
+                        continue;
+                    }
                 }
                 log.info("package weight belongs to max unassigned weight {}", packageInfo.getPackageWeightInKg());
                 maxWeightAssignableToVehicleInKg += packageInfo.getPackageWeightInKg();
                 packageInfo.setVehicleAssigned(Boolean.TRUE);
                 packageInfo.setVehicleNoAssigned(vehicleAssignmentDetails.getVehicleNo());
+                log.info("packageInfo after vehicle assignment {}", packageInfo);
             }
             vehicleAssignmentPackageInfoList.add(packageInfo);
         }
@@ -156,6 +170,8 @@ public class DeliveryTimeEstimationService {
             return vehicleAssignmentPackageInfo;
         }).collect(Collectors.toList());
         log.info("vehicleAssignmentPackageInfoList after updating estimated delivery time {}", vehicleAssignmentPackageInfoList);
+
+
         vehicleAssignmentDetails.setMaxWeightAssinableToVehicle(maxWeightAssignableToVehicleInKg);
         double totalRoundtripTimeForVehicle = getTwoDigitPrecision(maxDeliveryTimeForVehicle.get()) * 2;
         vehicleAssignmentDetails.setCurrentTime(totalRoundtripTimeForVehicle);
@@ -183,6 +199,18 @@ public class DeliveryTimeEstimationService {
             vehicleAssignmentDetailsList.add(vehicleAssignmentDetails);
         }
         return vehicleAssignmentDetailsList;
+    }
+
+    /**
+     *
+     * This method will check if all the packages are delivered
+     *
+     * @param packageInfoList - List of Objects to track package info
+     * @return - boolean value to denote all the packages are delivered or not
+     *
+     */
+    public boolean checkIfAllPackagesAreDelivered(List<PackageInfo> packageInfoList) {
+        return packageInfoList.stream().allMatch(PackageInfo::isVehicleAssigned) ? Boolean.TRUE : Boolean.FALSE;
     }
 
     /**

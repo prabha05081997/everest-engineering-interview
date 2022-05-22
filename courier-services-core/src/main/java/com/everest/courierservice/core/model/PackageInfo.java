@@ -39,4 +39,12 @@ public class PackageInfo {
         this.deliveryCost = deliveryCost;
         this.estimatedCostDeliveryTimeInHrs = estimatedCostDeliveryTimeInHrs;
     }
+
+    public PackageInfo(String packageId, int packageWeightInKg, int packageDistanceInKm, String offerCode, boolean isVehicleAssigned) {
+        this.packageId = packageId;
+        this.packageWeightInKg = packageWeightInKg;
+        this.packageDistanceInKm = packageDistanceInKm;
+        this.offerCode = offerCode;
+        this.isVehicleAssigned = isVehicleAssigned;
+    }
 }
