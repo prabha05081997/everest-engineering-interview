@@ -26,4 +26,17 @@ public class PackageInfo {
         this.packageDistanceInKm = packageDistanceInKm;
         this.offerCode = offerCode;
     }
+
+    public PackageInfo(String packageId, int discount, int deliveryCost) {
+        this.packageId = packageId;
+        this.discount = discount;
+        this.deliveryCost = deliveryCost;
+    }
+
+    public PackageInfo(String packageId, int discount, int deliveryCost, double estimatedCostDeliveryTimeInHrs) {
+        this.packageId = packageId;
+        this.discount = discount;
+        this.deliveryCost = deliveryCost;
+        this.estimatedCostDeliveryTimeInHrs = estimatedCostDeliveryTimeInHrs;
+    }
 }

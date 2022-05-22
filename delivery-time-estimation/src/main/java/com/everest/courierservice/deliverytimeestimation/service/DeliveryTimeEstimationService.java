@@ -58,7 +58,7 @@ public class DeliveryTimeEstimationService {
      * @return - List of Package info object with delivery time and vehicle info updated
      *
      */
-    private List<PackageInfo> assignVehiclesToPackages(List<VehicleAssignmentDetails> vehicleAssignmentDetailsList, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
+    public List<PackageInfo> assignVehiclesToPackages(List<VehicleAssignmentDetails> vehicleAssignmentDetailsList, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
         // running infinite loop until all the packages been delivered
         while(true) {
             List<PackageInfo> packageInfoListForVehicleAssigned = packageInfoList.stream().filter(packageInfo -> !packageInfo.isVehicleAssigned()).collect(Collectors.toList());
@@ -72,7 +72,7 @@ public class DeliveryTimeEstimationService {
                     .collect(Collectors.toList());
             log.info("vehicleAssignmentDetailsList sorted by deliver time {}", vehicleAssignmentDetailsList);
             for (VehicleAssignmentDetails vehicleAssignmentDetails : vehicleAssignmentDetailsList) {
-                packageInfoList = assignVehiclesToPackages(vehicleAssignmentDetails, packageInfoList, vehicle);
+                packageInfoList = assignVehicleToPackages(vehicleAssignmentDetails, packageInfoList, vehicle);
                 log.info("vehicleAssignmentDetailsList at the end of each iteration {}", vehicleAssignmentDetailsList);
             }
             log.info("packageInfoList for final printing {}", packageInfoList);
@@ -92,7 +92,7 @@ public class DeliveryTimeEstimationService {
      * @return - List of Package info object with delivery time and vehicle info updated
      *
      */
-    private List<PackageInfo> assignVehiclesToPackages(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
+    public List<PackageInfo> assignVehicleToPackages(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> packageInfoList, Vehicle vehicle) throws Exception {
         log.info("in assignVehiclesToPackages vehicleAssignmentDetails {} packageInfoList {} vehicle {}", vehicleAssignmentDetails, packageInfoList, vehicle);
         int maxWeightAssignableToVehicleInKg = 0;
         double maxSpeedInKmPerHr = vehicle.getMaxSpeedInKmPerHr();
@@ -176,7 +176,7 @@ public class DeliveryTimeEstimationService {
      * @return - List of VehicleAssignmentDetails objects with updated vehicle number
      *
      */
-    private List<VehicleAssignmentDetails> getVehicleAssignmentDetails(int noOfVehicles) {
+    public List<VehicleAssignmentDetails> getVehicleAssignmentDetails(int noOfVehicles) {
         List<VehicleAssignmentDetails> vehicleAssignmentDetailsList = new ArrayList<>();
         for(int i = 1; i <= noOfVehicles; i++) {
             VehicleAssignmentDetails vehicleAssignmentDetails = new VehicleAssignmentDetails(i);

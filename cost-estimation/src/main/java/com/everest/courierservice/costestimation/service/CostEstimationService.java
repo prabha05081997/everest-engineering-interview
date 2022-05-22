@@ -75,7 +75,7 @@ public class CostEstimationService {
      * @return - boolean value to indicate the elgibility for discount
      *
      */
-    private boolean checkIfPackageEligibleForDiscount(PackageInfo packageInfo, Map<String, Coupon> couponMap) {
+    public boolean checkIfPackageEligibleForDiscount(PackageInfo packageInfo, Map<String, Coupon> couponMap) {
         String offerCode = packageInfo.getOfferCode();
         Coupon coupon = couponMap.getOrDefault(offerCode, null);
         if(coupon == null) return Boolean.FALSE;
