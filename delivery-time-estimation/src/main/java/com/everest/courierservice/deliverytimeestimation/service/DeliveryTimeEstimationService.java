@@ -144,6 +144,26 @@ public class DeliveryTimeEstimationService {
             vehicleAssignmentPackageInfoList.add(packageInfo);
         }
 
+        calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, vehicleAssignmentPackageInfoList, maxUnassignedWeights, maxSpeedInKmPerHr,
+                maxWeightAssignableToVehicleInKg);
+
+        return vehicleAssignmentPackageInfoList;
+    }
+
+    /**
+     *
+     * This method will calculate the estimated delivery time for the packages, max delivery time and total round trip time for the vehicle
+     *
+     * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
+     * @param vehicleAssignmentPackageInfoList - List of Objects to track package info
+     * @param maxUnassignedWeights - weights of the packages that are not delivered yet
+     * @param maxSpeedInKmPerHr - max speed of a vehicle which we get from CLI input
+     * @param maxWeightAssignableToVehicleInKg - max weight assigned to vehicle during single journey to deliver the packages
+     *
+     */
+    private void calculateAndUpdateVehicleTimings(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> vehicleAssignmentPackageInfoList,
+                                                 List<Integer> maxUnassignedWeights, double maxSpeedInKmPerHr, int maxWeightAssignableToVehicleInKg) {
+
         // atomic variables to track estimated delivery time and max delivery time for vehicle inside lambda reference
         AtomicReference<Double> estimatedDeliveryTime = new AtomicReference<>((double) 0);
         AtomicReference<Double> maxDeliveryTimeForVehicle = new AtomicReference<>((double) 0);
@@ -171,17 +191,14 @@ public class DeliveryTimeEstimationService {
         }).collect(Collectors.toList());
         log.info("vehicleAssignmentPackageInfoList after updating estimated delivery time {}", vehicleAssignmentPackageInfoList);
 
-
         vehicleAssignmentDetails.setMaxWeightAssinableToVehicle(maxWeightAssignableToVehicleInKg);
         double totalRoundtripTimeForVehicle = getTwoDigitPrecision(maxDeliveryTimeForVehicle.get()) * 2;
         vehicleAssignmentDetails.setCurrentTime(totalRoundtripTimeForVehicle);
-
         log.info("adding current time {} to total delivery time {}", currentDeliveryTimeForVehicle, totalRoundtripTimeForVehicle);
+
         // add total roundtrip time of each delivery
         totalRoundtripTimeForVehicle += currentDeliveryTimeForVehicle;
-
         vehicleAssignmentDetails.setTotalDeliveryTime(totalRoundtripTimeForVehicle);
-        return vehicleAssignmentPackageInfoList;
     }
 
     /**
