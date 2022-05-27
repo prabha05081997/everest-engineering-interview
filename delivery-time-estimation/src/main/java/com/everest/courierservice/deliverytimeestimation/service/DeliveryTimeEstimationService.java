@@ -100,10 +100,8 @@ public class DeliveryTimeEstimationService {
             log.info("vehicles assigned for all the packages");
             return packageInfoList;
         }
-        int maxWeightAssignableToVehicleInKg = 0;
         double maxSpeedInKmPerHr = vehicle.getMaxSpeedInKmPerHr();
         List<PackageInfo> vehicleAssignmentPackageInfoList = new ArrayList<>();
-
         List<Integer> maxUnassignedWeights = getMaxUnassignedWeights(packageInfoList, vehicle);
 
         // fail safe mechanism - check if the weights are empty, and throw exception to avoid infinite loop
@@ -112,52 +110,11 @@ public class DeliveryTimeEstimationService {
             throw new ServiceException("max weight can't find from the given weights");
         }
 
-        assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, maxWeightAssignableToVehicleInKg, vehicleAssignmentDetails);
+        assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
 
-        calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, vehicleAssignmentPackageInfoList, maxUnassignedWeights, maxSpeedInKmPerHr,
-                maxWeightAssignableToVehicleInKg);
+        calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, vehicleAssignmentPackageInfoList, maxUnassignedWeights, maxSpeedInKmPerHr);
 
         return vehicleAssignmentPackageInfoList;
-    }
-
-    /**
-     *
-     * This method will assign vehicles to the packages based on certain conditions
-     * 1) For a single delivery, max weight and max no of packages should be carried
-     * 2) if weight is same package which can be delivered first should process first
-     *
-     * @param packageInfoList - List of Objects to track package info
-     * @param vehicleAssignmentPackageInfoList - List of Objects to track package info
-     * @param maxUnassignedWeights - weights of the packages that are not delivered yet
-     * @param maxWeightAssignableToVehicleInKg - max speed of a vehicle which we get from CLI input
-     * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
-     *
-     */
-    public void assignVehicleToPackage(List<PackageInfo> packageInfoList, List<PackageInfo> vehicleAssignmentPackageInfoList, List<Integer> maxUnassignedWeights,
-                                       int maxWeightAssignableToVehicleInKg, VehicleAssignmentDetails vehicleAssignmentDetails) {
-        // update vehicle info and weight details in package info object
-        for(PackageInfo packageInfo : packageInfoList) {
-            if(maxUnassignedWeights.contains(packageInfo.getPackageWeightInKg()) && packageInfo.isVehicleAssigned() == Boolean.FALSE) {
-                log.info("packageInfo inside vehicle assignment {}", packageInfo);
-                List<PackageInfo> tmpPackageInfoList = packageInfoList.stream().filter(packageInfo1 ->
-                        (packageInfo1.getPackageWeightInKg() == packageInfo.getPackageWeightInKg()) && (packageInfo1.isVehicleAssigned() == Boolean.FALSE)).collect(Collectors.toList());
-                if(tmpPackageInfoList.size() > 0) {
-                    // if weights are same, assign vehicle to the package which can be delivered first
-                    PackageInfo tmpPackageInfo = tmpPackageInfoList.stream().min(Comparator.comparing(PackageInfo::getPackageDistanceInKm))
-                            .get();
-                    if(tmpPackageInfo.getPackageDistanceInKm() != packageInfo.getPackageDistanceInKm()) {
-                        vehicleAssignmentPackageInfoList.add(packageInfo);
-                        continue;
-                    }
-                }
-                log.info("package weight belongs to max unassigned weight {}", packageInfo.getPackageWeightInKg());
-                maxWeightAssignableToVehicleInKg += packageInfo.getPackageWeightInKg();
-                packageInfo.setVehicleAssigned(Boolean.TRUE);
-                packageInfo.setVehicleNoAssigned(vehicleAssignmentDetails.getVehicleNo());
-                log.info("packageInfo after vehicle assignment {}", packageInfo);
-            }
-            vehicleAssignmentPackageInfoList.add(packageInfo);
-        }
     }
 
     /**
@@ -183,18 +140,57 @@ public class DeliveryTimeEstimationService {
 
     /**
      *
+     * This method will assign vehicles to the packages based on certain conditions
+     * 1) For a single delivery, max weight and max no of packages should be carried
+     * 2) if weight is same package which can be delivered first should process first
+     *
+     * @param packageInfoList - List of Objects to track package info
+     * @param vehicleAssignmentPackageInfoList - List of Objects to track package info
+     * @param maxUnassignedWeights - weights of the packages that are not delivered yet
+     * // @param maxWeightAssignableToVehicleInKg - max speed of a vehicle which we get from CLI input
+     * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
+     *
+     */
+    public void assignVehicleToPackage(List<PackageInfo> packageInfoList, List<PackageInfo> vehicleAssignmentPackageInfoList, List<Integer> maxUnassignedWeights,
+                                       VehicleAssignmentDetails vehicleAssignmentDetails) {
+        // update vehicle info and weight details in package info object
+        for(PackageInfo packageInfo : packageInfoList) {
+            if(maxUnassignedWeights.contains(packageInfo.getPackageWeightInKg()) && packageInfo.isVehicleAssigned() == Boolean.FALSE) {
+                log.info("packageInfo inside vehicle assignment {}", packageInfo);
+                List<PackageInfo> tmpPackageInfoList = packageInfoList.stream().filter(packageInfo1 ->
+                        (packageInfo1.getPackageWeightInKg() == packageInfo.getPackageWeightInKg()) && (packageInfo1.isVehicleAssigned() == Boolean.FALSE)).collect(Collectors.toList());
+                if(tmpPackageInfoList.size() > 0) {
+                    // if weights are same, assign vehicle to the package which can be delivered first
+                    PackageInfo tmpPackageInfo = tmpPackageInfoList.stream().min(Comparator.comparing(PackageInfo::getPackageDistanceInKm))
+                            .get();
+                    if(tmpPackageInfo.getPackageDistanceInKm() != packageInfo.getPackageDistanceInKm()) {
+                        vehicleAssignmentPackageInfoList.add(packageInfo);
+                        continue;
+                    }
+                }
+                log.info("package weight belongs to max unassigned weight {}", packageInfo.getPackageWeightInKg());
+                packageInfo.setVehicleAssigned(Boolean.TRUE);
+                packageInfo.setVehicleNoAssigned(vehicleAssignmentDetails.getVehicleNo());
+                log.info("packageInfo after vehicle assignment {}", packageInfo);
+            }
+            vehicleAssignmentPackageInfoList.add(packageInfo);
+        }
+        log.info("vehicleAssignmentPackageInfoList after assigning vehicle to package {}", vehicleAssignmentPackageInfoList);
+    }
+
+    /**
+     *
      * This method will calculate the estimated delivery time for the packages, max delivery time and total round trip time for the vehicle
      *
      * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
      * @param vehicleAssignmentPackageInfoList - List of Objects to track package info
      * @param maxUnassignedWeights - weights of the packages that are not delivered yet
      * @param maxSpeedInKmPerHr - max speed of a vehicle which we get from CLI input
-     * @param maxWeightAssignableToVehicleInKg - max weight assigned to vehicle during single journey to deliver the packages
+     * // @param maxWeightAssignableToVehicleInKg - max weight assigned to vehicle during single journey to deliver the packages
      *
      */
     private void calculateAndUpdateVehicleTimings(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> vehicleAssignmentPackageInfoList,
-                                                 List<Integer> maxUnassignedWeights, double maxSpeedInKmPerHr, int maxWeightAssignableToVehicleInKg) {
-
+                                                 List<Integer> maxUnassignedWeights, double maxSpeedInKmPerHr) {
         // atomic variables to track estimated delivery time and max delivery time for vehicle inside lambda reference
         AtomicReference<Double> estimatedDeliveryTime = new AtomicReference<>((double) 0);
         AtomicReference<Double> maxDeliveryTimeForVehicle = new AtomicReference<>((double) 0);
@@ -204,25 +200,22 @@ public class DeliveryTimeEstimationService {
 
         // update the delivery time for package and for the vehicle
         vehicleAssignmentPackageInfoList = vehicleAssignmentPackageInfoList.stream().map(vehicleAssignmentPackageInfo -> {
-            if(vehicleAssignmentPackageInfo.isVehicleAssigned()) {
-                if(maxUnassignedWeights.contains(vehicleAssignmentPackageInfo.getPackageWeightInKg())) {
-                    double packageDistanceInKm = vehicleAssignmentPackageInfo.getPackageDistanceInKm();
-                    estimatedDeliveryTime.set(packageDistanceInKm / maxSpeedInKmPerHr);
-                    if(estimatedDeliveryTime.get() > maxDeliveryTimeForVehicle.get()) {
-                        maxDeliveryTimeForVehicle.set(estimatedDeliveryTime.get());
-                    }
-
-                    log.info("totalDeliveryTimeForVehicle {} estimatedDeliveryTime {}", totalDeliveryTimeForVehicle, estimatedDeliveryTime.get());
-                    double estimatedCostDeliveryTimeForVehicle = getTwoDigitPrecision(totalDeliveryTimeForVehicle + estimatedDeliveryTime.get());
-                    log.info("estimatedCostDeliveryTimeForVehicle {}", estimatedCostDeliveryTimeForVehicle);
-                    vehicleAssignmentPackageInfo.setEstimatedCostDeliveryTimeInHrs(estimatedCostDeliveryTimeForVehicle);
+            if(vehicleAssignmentPackageInfo.isVehicleAssigned() && maxUnassignedWeights.contains(vehicleAssignmentPackageInfo.getPackageWeightInKg())) {
+                double packageDistanceInKm = vehicleAssignmentPackageInfo.getPackageDistanceInKm();
+                estimatedDeliveryTime.set(packageDistanceInKm / maxSpeedInKmPerHr);
+                if(estimatedDeliveryTime.get() > maxDeliveryTimeForVehicle.get()) {
+                    maxDeliveryTimeForVehicle.set(estimatedDeliveryTime.get());
                 }
+
+                log.info("totalDeliveryTimeForVehicle {} estimatedDeliveryTime {}", totalDeliveryTimeForVehicle, estimatedDeliveryTime.get());
+                double estimatedCostDeliveryTimeForVehicle = getTwoDigitPrecision(totalDeliveryTimeForVehicle + estimatedDeliveryTime.get());
+                log.info("estimatedCostDeliveryTimeForVehicle {}", estimatedCostDeliveryTimeForVehicle);
+                vehicleAssignmentPackageInfo.setEstimatedCostDeliveryTimeInHrs(estimatedCostDeliveryTimeForVehicle);
             }
             return vehicleAssignmentPackageInfo;
         }).collect(Collectors.toList());
         log.info("vehicleAssignmentPackageInfoList after updating estimated delivery time {}", vehicleAssignmentPackageInfoList);
 
-        vehicleAssignmentDetails.setMaxWeightAssinableToVehicle(maxWeightAssignableToVehicleInKg);
         double totalRoundtripTimeForVehicle = getTwoDigitPrecision(maxDeliveryTimeForVehicle.get()) * 2;
         vehicleAssignmentDetails.setCurrentTime(totalRoundtripTimeForVehicle);
         log.info("adding current time {} to total delivery time {}", currentDeliveryTimeForVehicle, totalRoundtripTimeForVehicle);

@@ -114,6 +114,8 @@ public class DeliveryEstimationTest {
         resultCostEstimationPackageInfoList = resultCostEstimationPackageInfoList.stream().map(expectedCostEstimationPackageInfo -> new PackageInfo(expectedCostEstimationPackageInfo.getPackageId(), expectedCostEstimationPackageInfo.getDiscount(),
                 expectedCostEstimationPackageInfo.getDeliveryCost(), expectedCostEstimationPackageInfo.getEstimatedCostDeliveryTimeInHrs())).collect(Collectors.toList());
         assertEquals(expectedVehicleCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);
+
+        // failure case assertion
     }
 
     @Test
@@ -142,5 +144,49 @@ public class DeliveryEstimationTest {
         packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA"));
 
         assertEquals(List.of(110, 75), DeliveryTimeEstimationService.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle));
+    }
+
+    @Test
+    public void testAssignVehicleToPackage() {
+        Vehicle vehicle = new Vehicle(70, 200);
+        List<PackageInfo> packageInfoList = new ArrayList<>();
+        packageInfoList.add(new PackageInfo("PKG1", 50, 30, "OFR001"));
+        packageInfoList.add(new PackageInfo("PKG2", 75, 125, "OFR008"));
+        packageInfoList.add(new PackageInfo("PKG3", 175, 100, "OFR003"));
+        packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002"));
+        packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA"));
+
+        List<PackageInfo> expectedVehicleAssignmentPackageInfoList = packageInfoList.stream().map(packageInfo -> {
+            if (packageInfo.getPackageId().equals("PKG2")) {
+                packageInfo.setVehicleNoAssigned(1);
+                packageInfo.setVehicleAssigned(Boolean.TRUE);
+                packageInfo.setDeliveryCost(1475);
+            } else if (packageInfo.getPackageId().equals("PKG4")) {
+                packageInfo.setVehicleNoAssigned(1);
+                packageInfo.setVehicleAssigned(Boolean.TRUE);
+                packageInfo.setDiscount(105);
+                packageInfo.setDeliveryCost(1395);
+            }
+            return packageInfo;
+        }).collect(Collectors.toList());
+
+        VehicleAssignmentDetails vehicleAssignmentDetails = new VehicleAssignmentDetails(1);
+        List<Integer> maxUnassignedWeights = DeliveryTimeEstimationService.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle);
+
+        List<PackageInfo> vehicleAssignmentPackageInfoList = new ArrayList<>();
+        DeliveryTimeEstimationService.getInstance().assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
+        assertEquals(expectedVehicleAssignmentPackageInfoList, packageInfoList);
+
+        expectedVehicleAssignmentPackageInfoList = expectedVehicleAssignmentPackageInfoList.stream().map(packageInfo -> {
+            if(packageInfo.getPackageId().equals("PKG3")){
+                packageInfo.setVehicleNoAssigned(2);
+                packageInfo.setVehicleAssigned(Boolean.TRUE);
+                packageInfo.setDeliveryCost(2350);
+            }
+            return packageInfo;
+        }).collect(Collectors.toList());
+
+        DeliveryTimeEstimationService.getInstance().assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
+        assertEquals(expectedVehicleAssignmentPackageInfoList, packageInfoList);
     }
 }
