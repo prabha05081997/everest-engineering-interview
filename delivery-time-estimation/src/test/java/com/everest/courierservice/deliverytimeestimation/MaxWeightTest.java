@@ -1,6 +1,6 @@
 package com.everest.courierservice.deliverytimeestimation;
 
-import com.everest.courierservice.deliverytimeestimation.service.MaxWeightService;
+import com.everest.courierservice.deliverytimeestimation.service.MaxWeightEstimationService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class MaxWeightTest {
         int maxCarriableWeightInKg = 200;
         List<Integer> unassignedWeights = List.of(50, 75, 175, 110, 155);
         List<Integer> expectedMaxWeights = List.of(110, 75);
-        List<Integer> resultMaxWeights = MaxWeightService.getInstance().findMaxWeights(unassignedWeights, maxCarriableWeightInKg);
+        List<Integer> resultMaxWeights = MaxWeightEstimationService.getInstance().findMaxWeights(unassignedWeights, maxCarriableWeightInKg);
         assertEquals(expectedMaxWeights, resultMaxWeights);
     }
 }

@@ -111,7 +111,7 @@ public class DeliveryTimeEstimationService {
                 .map(PackageInfo::getPackageWeightInKg)
                 .collect(Collectors.toList());
         log.info("unassignedWeights {}", unassignedWeights);
-        List<Integer> maxUnassignedWeights = MaxWeightService.getInstance().findMaxWeights(unassignedWeights, vehicle.getMaxCarriableWeightInKg());
+        List<Integer> maxUnassignedWeights = MaxWeightEstimationService.getInstance().findMaxWeights(unassignedWeights, vehicle.getMaxCarriableWeightInKg());
         log.info("maxUnassignedWeights {}", maxUnassignedWeights);
 
         // fail safe mechanism - check if the weights are empty, and throw exception to avoid infinite loop

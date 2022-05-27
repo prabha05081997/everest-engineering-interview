@@ -2,7 +2,7 @@ package com.everest.courierservice.core.exception;
 
 import lombok.extern.slf4j.Slf4j;
 
-import static com.everest.courierservice.core.constants.HttpStatusConstants.*;
+import static com.everest.courierservice.core.constants.HttpStatusCodeConstants.*;
 
 @Slf4j
 public class ExceptionController {
