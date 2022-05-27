@@ -118,7 +118,6 @@ public class DeliveryEstimationTest {
 
     @Test
     public void testIfAllPackagesDelivered() {
-
         List<PackageInfo> packageInfoList = new ArrayList<>();
         packageInfoList.add(new PackageInfo("PKG1", 50, 30, "OFR001", Boolean.TRUE));
         packageInfoList.add(new PackageInfo("PKG2", 75, 125, "OFR008", Boolean.TRUE));
@@ -130,5 +129,18 @@ public class DeliveryEstimationTest {
         packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA", Boolean.TRUE));
 
         assertEquals(Boolean.FALSE, DeliveryTimeEstimationService.getInstance().checkIfAllPackagesAreDelivered(packageInfoList));
+    }
+
+    @Test
+    public void testGetMaxUnassignedWeights() {
+        Vehicle vehicle = new Vehicle(70, 200);
+        List<PackageInfo> packageInfoList = new ArrayList<>();
+        packageInfoList.add(new PackageInfo("PKG1", 50, 30, "OFR001"));
+        packageInfoList.add(new PackageInfo("PKG2", 75, 125, "OFR008"));
+        packageInfoList.add(new PackageInfo("PKG3", 175, 100, "OFR003"));
+        packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002"));
+        packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA"));
+
+        assertEquals(List.of(110, 75), DeliveryTimeEstimationService.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle));
     }
 }

@@ -83,9 +83,8 @@ public class DeliveryTimeEstimationService {
 
     /**
      *
-     * This method will assign vehicles to the packages based on certain conditions
-     * 1) For a single delivery, max weight and max no of packages should be carried
-     * 2) if weight is same package which can be delivered first should process first
+     * This method will delegate the calculation for packages to be delivered first
+     * and the assignment of vehicles
      *
      * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
      * @param packageInfoList - List of Objects to track package info
@@ -105,14 +104,7 @@ public class DeliveryTimeEstimationService {
         double maxSpeedInKmPerHr = vehicle.getMaxSpeedInKmPerHr();
         List<PackageInfo> vehicleAssignmentPackageInfoList = new ArrayList<>();
 
-        // process the packages only if it's not delivered already
-        List<Integer> unassignedWeights = packageInfoList.stream()
-                .filter(packageInfo -> packageInfo.isVehicleAssigned() == Boolean.FALSE)
-                .map(PackageInfo::getPackageWeightInKg)
-                .collect(Collectors.toList());
-        log.info("unassignedWeights {}", unassignedWeights);
-        List<Integer> maxUnassignedWeights = MaxWeightEstimationService.getInstance().findMaxWeights(unassignedWeights, vehicle.getMaxCarriableWeightInKg());
-        log.info("maxUnassignedWeights {}", maxUnassignedWeights);
+        List<Integer> maxUnassignedWeights = getMaxUnassignedWeights(packageInfoList, vehicle);
 
         // fail safe mechanism - check if the weights are empty, and throw exception to avoid infinite loop
         if(maxUnassignedWeights.isEmpty()) {
@@ -120,6 +112,29 @@ public class DeliveryTimeEstimationService {
             throw new ServiceException("max weight can't find from the given weights");
         }
 
+        assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, maxWeightAssignableToVehicleInKg, vehicleAssignmentDetails);
+
+        calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, vehicleAssignmentPackageInfoList, maxUnassignedWeights, maxSpeedInKmPerHr,
+                maxWeightAssignableToVehicleInKg);
+
+        return vehicleAssignmentPackageInfoList;
+    }
+
+    /**
+     *
+     * This method will assign vehicles to the packages based on certain conditions
+     * 1) For a single delivery, max weight and max no of packages should be carried
+     * 2) if weight is same package which can be delivered first should process first
+     *
+     * @param packageInfoList - List of Objects to track package info
+     * @param vehicleAssignmentPackageInfoList - List of Objects to track package info
+     * @param maxUnassignedWeights - weights of the packages that are not delivered yet
+     * @param maxWeightAssignableToVehicleInKg - max speed of a vehicle which we get from CLI input
+     * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
+     *
+     */
+    public void assignVehicleToPackage(List<PackageInfo> packageInfoList, List<PackageInfo> vehicleAssignmentPackageInfoList, List<Integer> maxUnassignedWeights,
+                                       int maxWeightAssignableToVehicleInKg, VehicleAssignmentDetails vehicleAssignmentDetails) {
         // update vehicle info and weight details in package info object
         for(PackageInfo packageInfo : packageInfoList) {
             if(maxUnassignedWeights.contains(packageInfo.getPackageWeightInKg()) && packageInfo.isVehicleAssigned() == Boolean.FALSE) {
@@ -143,11 +158,27 @@ public class DeliveryTimeEstimationService {
             }
             vehicleAssignmentPackageInfoList.add(packageInfo);
         }
+    }
 
-        calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, vehicleAssignmentPackageInfoList, maxUnassignedWeights, maxSpeedInKmPerHr,
-                maxWeightAssignableToVehicleInKg);
-
-        return vehicleAssignmentPackageInfoList;
+    /**
+     *
+     * This method will return the max weights that can be carried by vehicle for the packages that are not delivered yet
+     *
+     * @param packageInfoList - List of Objects to track package info
+     * @param vehicle - Object to track vehicle info
+     * @return - List of integers denotes the max unassigned weights for which packages are not delivered yet
+     *
+     */
+    public List<Integer> getMaxUnassignedWeights(List<PackageInfo> packageInfoList, Vehicle vehicle) {
+        // process the packages only if it's not delivered already
+        List<Integer> unassignedWeights = packageInfoList.stream()
+                .filter(packageInfo -> packageInfo.isVehicleAssigned() == Boolean.FALSE)
+                .map(PackageInfo::getPackageWeightInKg)
+                .collect(Collectors.toList());
+        log.info("unassignedWeights {}", unassignedWeights);
+        List<Integer> maxUnassignedWeights = MaxWeightEstimationService.getInstance().findMaxWeights(unassignedWeights, vehicle.getMaxCarriableWeightInKg());
+        log.info("maxUnassignedWeights {}", maxUnassignedWeights);
+        return maxUnassignedWeights;
     }
 
     /**
