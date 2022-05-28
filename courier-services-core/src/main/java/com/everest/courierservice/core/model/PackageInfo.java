@@ -47,4 +47,14 @@ public class PackageInfo {
         this.offerCode = offerCode;
         this.isVehicleAssigned = isVehicleAssigned;
     }
+
+    public PackageInfo(String packageId, int packageWeightInKg, int packageDistanceInKm, String offerCode, boolean isVehicleAssigned,
+                       int vehicleNoAssigned) {
+        this.packageId = packageId;
+        this.packageWeightInKg = packageWeightInKg;
+        this.packageDistanceInKm = packageDistanceInKm;
+        this.offerCode = offerCode;
+        this.isVehicleAssigned = isVehicleAssigned;
+        this.vehicleNoAssigned = vehicleNoAssigned;
+    }
 }

@@ -63,7 +63,7 @@ public class DeliveryTimeEstimationService {
         while(true) {
             boolean isAllPackagesDelivered = checkIfAllPackagesAreDelivered(packageInfoList);
             if (isAllPackagesDelivered) {
-                log.info("vehicles assigned for all the packages");
+                log.info("all the packages are delivered");
                 break;
             }
 
@@ -147,7 +147,6 @@ public class DeliveryTimeEstimationService {
      * @param packageInfoList - List of Objects to track package info
      * @param vehicleAssignmentPackageInfoList - List of Objects to track package info
      * @param maxUnassignedWeights - weights of the packages that are not delivered yet
-     * // @param maxWeightAssignableToVehicleInKg - max speed of a vehicle which we get from CLI input
      * @param vehicleAssignmentDetails - Object to track vehicle and package assignment info
      *
      */
@@ -186,10 +185,9 @@ public class DeliveryTimeEstimationService {
      * @param vehicleAssignmentPackageInfoList - List of Objects to track package info
      * @param maxUnassignedWeights - weights of the packages that are not delivered yet
      * @param maxSpeedInKmPerHr - max speed of a vehicle which we get from CLI input
-     * // @param maxWeightAssignableToVehicleInKg - max weight assigned to vehicle during single journey to deliver the packages
      *
      */
-    private void calculateAndUpdateVehicleTimings(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> vehicleAssignmentPackageInfoList,
+    public void calculateAndUpdateVehicleTimings(VehicleAssignmentDetails vehicleAssignmentDetails, List<PackageInfo> vehicleAssignmentPackageInfoList,
                                                  List<Integer> maxUnassignedWeights, double maxSpeedInKmPerHr) {
         // atomic variables to track estimated delivery time and max delivery time for vehicle inside lambda reference
         AtomicReference<Double> estimatedDeliveryTime = new AtomicReference<>((double) 0);
@@ -206,7 +204,6 @@ public class DeliveryTimeEstimationService {
                 if(estimatedDeliveryTime.get() > maxDeliveryTimeForVehicle.get()) {
                     maxDeliveryTimeForVehicle.set(estimatedDeliveryTime.get());
                 }
-
                 log.info("totalDeliveryTimeForVehicle {} estimatedDeliveryTime {}", totalDeliveryTimeForVehicle, estimatedDeliveryTime.get());
                 double estimatedCostDeliveryTimeForVehicle = getTwoDigitPrecision(totalDeliveryTimeForVehicle + estimatedDeliveryTime.get());
                 log.info("estimatedCostDeliveryTimeForVehicle {}", estimatedCostDeliveryTimeForVehicle);
@@ -261,7 +258,7 @@ public class DeliveryTimeEstimationService {
      * @return - two digit precision double value
      *
      */
-    private double getTwoDigitPrecision(double value) {
+    public double getTwoDigitPrecision(double value) {
         value *= 100;
         value = Math.floor(value);
         value /= 100;

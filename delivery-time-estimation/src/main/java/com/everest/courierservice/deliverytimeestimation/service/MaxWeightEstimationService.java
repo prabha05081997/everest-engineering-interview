@@ -10,7 +10,7 @@ import java.util.List;
 public class MaxWeightEstimationService {
 
     private static MaxWeightEstimationService maxWeightEstimationService;
-    private boolean[][] dp;
+    private boolean[][] maxWeightEstimationArray; // two dimensional array to store sub values to calculate max weights in dynamic programming approach
     private static List<List<Integer>> maxWeights;
 
     private MaxWeightEstimationService() {
@@ -46,7 +46,7 @@ public class MaxWeightEstimationService {
     }
 
     private void getMaxSubsetsRec(int[] arr, int i, int sum, List<Integer> p) {
-        if (i == 0 && sum != 0 && dp[0][sum]) {
+        if (i == 0 && sum != 0 && maxWeightEstimationArray[0][sum]) {
             p.add(arr[i]);
             maxWeights.add(p);
             log.info("maxWeights while display {}", maxWeights);
@@ -59,12 +59,12 @@ public class MaxWeightEstimationService {
             return;
         }
 
-        if (dp[i-1][sum]) {
+        if (maxWeightEstimationArray[i-1][sum]) {
             ArrayList<Integer> b = new ArrayList<>(p);
             getMaxSubsetsRec(arr, i-1, sum, b);
         }
 
-        if (sum >= arr[i] && dp[i-1][sum-arr[i]]) {
+        if (sum >= arr[i] && maxWeightEstimationArray[i-1][sum-arr[i]]) {
             p.add(arr[i]);
             getMaxSubsetsRec(arr, i-1, sum-arr[i], p);
         }
@@ -85,23 +85,23 @@ public class MaxWeightEstimationService {
         if (n == 0 || sum < 0)
             return maxWeights;
 
-        dp = new boolean[n][sum + 1];
+        maxWeightEstimationArray = new boolean[n][sum + 1];
         for (int i=0; i<n; ++i) {
-            dp[i][0] = true;
+            maxWeightEstimationArray[i][0] = true;
         }
 
-        if (arr[0] <= sum) dp[0][arr[0]] = true;
+        if (arr[0] <= sum) maxWeightEstimationArray[0][arr[0]] = true;
 
         for (int i = 1; i < n; ++i) {
             for (int j = 0; j < sum + 1; ++j) {
-                dp[i][j] = (arr[i] <= j) ? (dp[i - 1][j] || dp[i - 1][j - arr[i]]) : dp[i - 1][j];
+                maxWeightEstimationArray[i][j] = (arr[i] <= j) ? (maxWeightEstimationArray[i - 1][j] || maxWeightEstimationArray[i - 1][j - arr[i]]) : maxWeightEstimationArray[i - 1][j];
             }
         }
 
         int index_i = 0, index_j = 0;
-        for (int i = dp.length - 1; i >= 0; i--) {
-            for (int j = dp[i].length - 1; j >= 0; j--) {
-                if (dp[i][j]) {
+        for (int i = maxWeightEstimationArray.length - 1; i >= 0; i--) {
+            for (int j = maxWeightEstimationArray[i].length - 1; j >= 0; j--) {
+                if (maxWeightEstimationArray[i][j]) {
                     index_i = i;
                     index_j = j;
                     break;
@@ -112,7 +112,7 @@ public class MaxWeightEstimationService {
             }
         }
 
-        if(!dp[index_i][index_j]) {
+        if(!maxWeightEstimationArray[index_i][index_j]) {
             log.info("There are no subsets with sum "+ sum);
             return maxWeights;
         }
@@ -127,10 +127,10 @@ public class MaxWeightEstimationService {
      * This method will sort the package weights based on number of packages
      *
      * @param list - List of weights of list
-     * @param <T> - List of weights
+     * @param <T> - List of integer weights
      * @return - sorted by desc list
      */
-    public static <T> List<? extends List<T>> sortListByValue(List<? extends List<T>> list) {
+    public <T> List<? extends List<T>> sortListByValue(List<? extends List<T>> list) {
         if(list.size() == 1) return list;
         list.sort((Comparator<List<T>>) (o1, o2) -> Integer.compare(o2.size(), o1.size()));
         return list;

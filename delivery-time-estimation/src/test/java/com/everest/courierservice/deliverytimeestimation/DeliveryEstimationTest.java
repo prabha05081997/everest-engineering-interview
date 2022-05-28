@@ -189,4 +189,39 @@ public class DeliveryEstimationTest {
         DeliveryTimeEstimationService.getInstance().assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
         assertEquals(expectedVehicleAssignmentPackageInfoList, packageInfoList);
     }
+
+    /**
+     * This will test the calculation of estimated time for delivery for the package
+     */
+    @Test
+    public void testCalculateAndUpdateVehicleTimings() {
+        Vehicle vehicle = new Vehicle(70, 200);
+        List<PackageInfo> packageInfoList = new ArrayList<>();
+        packageInfoList.add(new PackageInfo("PKG1", 50, 30, "OFR001"));
+        packageInfoList.add(new PackageInfo("PKG2", 75, 125, "OFR008", Boolean.TRUE, 1));
+        packageInfoList.add(new PackageInfo("PKG3", 175, 100, "OFR003"));
+        packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002", Boolean.TRUE, 1));
+        packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA"));
+
+        List<PackageInfo> expectedVehicleAssignmentPackageInfoList = packageInfoList.stream().map(packageInfo -> {
+            if (packageInfo.getPackageId().equals("PKG2")) {
+                packageInfo.setEstimatedCostDeliveryTimeInHrs(1.78);
+            } else if (packageInfo.getPackageId().equals("PKG4")) {
+                packageInfo.setEstimatedCostDeliveryTimeInHrs(0.85);
+            }
+            return packageInfo;
+        }).collect(Collectors.toList());
+
+        VehicleAssignmentDetails vehicleAssignmentDetails = new VehicleAssignmentDetails(1);
+        List<Integer> maxUnassignedWeights = DeliveryTimeEstimationService.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle);
+
+        DeliveryTimeEstimationService.getInstance().calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, packageInfoList, maxUnassignedWeights, vehicle.getMaxSpeedInKmPerHr());
+        assertEquals(expectedVehicleAssignmentPackageInfoList, packageInfoList);
+    }
+
+    @Test
+    public void testGetTwoDigitPrecision() {
+        assertEquals(0.85, DeliveryTimeEstimationService.getInstance().getTwoDigitPrecision(0.85934342), 0);
+        assertEquals(1.42, DeliveryTimeEstimationService.getInstance().getTwoDigitPrecision(1.42454644), 0);
+    }
 }
