@@ -16,10 +16,10 @@ public class ExceptionController {
             log.error("in input validation exception");
             errorResponse = HTTP_BAD_REQUEST + " - " + e.getMessage();
         } else if (e instanceof ServiceException) {
-            log.error("in not found exceptiom with exception");
+            log.error("in service exception");
             errorResponse = HTTP_INTERNAL_ERROR + " - " + e.getMessage();
         } else {
-            log.error("in generic exceptiom with exception");
+            log.error("in generic exception");
             errorResponse = HTTP_INTERNAL_ERROR + " - " + e.getMessage();
         }
         return errorResponse;
