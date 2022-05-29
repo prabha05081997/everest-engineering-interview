@@ -45,7 +45,7 @@ public class Main {
                 baseDeliveryCost, noOfPackages, packageInfoList);
 
         try {
-            List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
+            List<PackageInfo> packageInfoResultList = CostEstimationServiceImpl.getInstance().findCostEstimation(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
             log.info("===============================================================================================");
             for (PackageInfo packageInfo : packageInfoResultList) {
                 log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost());

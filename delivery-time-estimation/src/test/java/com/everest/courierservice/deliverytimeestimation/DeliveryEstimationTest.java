@@ -5,8 +5,8 @@ import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.model.Vehicle;
 import com.everest.courierservice.core.model.VehicleAssignmentDetails;
 import com.everest.courierservice.core.service.CouponService;
-import com.everest.courierservice.costestimation.service.CostEstimationService;
-import com.everest.courierservice.deliverytimeestimation.service.DeliveryTimeEstimationService;
+import com.everest.courierservice.costestimation.service.CostEstimationServiceImpl;
+import com.everest.courierservice.deliverytimeestimation.service.DeliveryTimeEstimationServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class DeliveryEstimationTest {
         expectedVehicleAssignmentDetailsList.add(new VehicleAssignmentDetails(1));
         expectedVehicleAssignmentDetailsList.add(new VehicleAssignmentDetails(2));
 
-        List<VehicleAssignmentDetails> resultVehicleAssignmentDetailsList = DeliveryTimeEstimationService.getInstance().getVehicleAssignmentDetails(noOfVehicles);
+        List<VehicleAssignmentDetails> resultVehicleAssignmentDetailsList = DeliveryTimeEstimationServiceImpl.getInstance().getVehicleAssignmentDetails(noOfVehicles);
         assertEquals(expectedVehicleAssignmentDetailsList, resultVehicleAssignmentDetailsList);
     }
 
@@ -51,8 +51,8 @@ public class DeliveryEstimationTest {
         packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002"));
         packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA"));
 
-        List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
-        List<PackageInfo> resultCostEstimationPackageInfoList = DeliveryTimeEstimationService.getInstance().findDeliveryTimeEstimationForCourierService(packageInfoResultList, noOfVehicles, vehicle);
+        List<PackageInfo> packageInfoResultList = CostEstimationServiceImpl.getInstance().findCostEstimation(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
+        List<PackageInfo> resultCostEstimationPackageInfoList = DeliveryTimeEstimationServiceImpl.getInstance().findDeliveryTimeEstimation(packageInfoResultList, noOfVehicles, vehicle);
         resultCostEstimationPackageInfoList = resultCostEstimationPackageInfoList.stream().map(expectedCostEstimationPackageInfo -> new PackageInfo(expectedCostEstimationPackageInfo.getPackageId(), expectedCostEstimationPackageInfo.getDiscount(),
                 expectedCostEstimationPackageInfo.getDeliveryCost(), expectedCostEstimationPackageInfo.getEstimatedCostDeliveryTimeInHrs())).collect(Collectors.toList());
         assertEquals(expectedCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);
@@ -80,8 +80,8 @@ public class DeliveryEstimationTest {
         expectedVehicleAssignmentDetailsList.add(new VehicleAssignmentDetails(1));
         expectedVehicleAssignmentDetailsList.add(new VehicleAssignmentDetails(2));
 
-        List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
-        List<PackageInfo> resultCostEstimationPackageInfoList = DeliveryTimeEstimationService.getInstance().assignVehiclesToPackages(expectedVehicleAssignmentDetailsList, packageInfoResultList, vehicle);
+        List<PackageInfo> packageInfoResultList = CostEstimationServiceImpl.getInstance().findCostEstimation(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
+        List<PackageInfo> resultCostEstimationPackageInfoList = DeliveryTimeEstimationServiceImpl.getInstance().assignVehiclesToPackages(expectedVehicleAssignmentDetailsList, packageInfoResultList, vehicle);
         resultCostEstimationPackageInfoList = resultCostEstimationPackageInfoList.stream().map(expectedCostEstimationPackageInfo -> new PackageInfo(expectedCostEstimationPackageInfo.getPackageId(), expectedCostEstimationPackageInfo.getDiscount(),
                 expectedCostEstimationPackageInfo.getDeliveryCost(), expectedCostEstimationPackageInfo.getEstimatedCostDeliveryTimeInHrs())).collect(Collectors.toList());
         assertEquals(expectedCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);
@@ -109,8 +109,8 @@ public class DeliveryEstimationTest {
         expectedVehicleAssignmentDetailsList.add(new VehicleAssignmentDetails(1));
         expectedVehicleAssignmentDetailsList.add(new VehicleAssignmentDetails(2));
 
-        List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
-        List<PackageInfo> resultCostEstimationPackageInfoList = DeliveryTimeEstimationService.getInstance().assignVehicleToPackages(expectedVehicleAssignmentDetailsList.get(0), packageInfoResultList, vehicle);
+        List<PackageInfo> packageInfoResultList = CostEstimationServiceImpl.getInstance().findCostEstimation(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
+        List<PackageInfo> resultCostEstimationPackageInfoList = DeliveryTimeEstimationServiceImpl.getInstance().assignVehicleToPackages(expectedVehicleAssignmentDetailsList.get(0), packageInfoResultList, vehicle);
         resultCostEstimationPackageInfoList = resultCostEstimationPackageInfoList.stream().map(expectedCostEstimationPackageInfo -> new PackageInfo(expectedCostEstimationPackageInfo.getPackageId(), expectedCostEstimationPackageInfo.getDiscount(),
                 expectedCostEstimationPackageInfo.getDeliveryCost(), expectedCostEstimationPackageInfo.getEstimatedCostDeliveryTimeInHrs())).collect(Collectors.toList());
         assertEquals(expectedVehicleCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);
@@ -125,12 +125,12 @@ public class DeliveryEstimationTest {
         packageInfoList.add(new PackageInfo("PKG2", 75, 125, "OFR008", Boolean.TRUE));
         packageInfoList.add(new PackageInfo("PKG3", 175, 100, "OFR003", Boolean.TRUE));
 
-        assertEquals(Boolean.TRUE, DeliveryTimeEstimationService.getInstance().checkIfAllPackagesAreDelivered(packageInfoList));
+        assertEquals(Boolean.TRUE, DeliveryTimeEstimationServiceImpl.getInstance().checkIfAllPackagesAreDelivered(packageInfoList));
 
         packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002", Boolean.FALSE));
         packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA", Boolean.TRUE));
 
-        assertEquals(Boolean.FALSE, DeliveryTimeEstimationService.getInstance().checkIfAllPackagesAreDelivered(packageInfoList));
+        assertEquals(Boolean.FALSE, DeliveryTimeEstimationServiceImpl.getInstance().checkIfAllPackagesAreDelivered(packageInfoList));
     }
 
     @Test
@@ -143,7 +143,7 @@ public class DeliveryEstimationTest {
         packageInfoList.add(new PackageInfo("PKG4", 110, 60, "OFR002"));
         packageInfoList.add(new PackageInfo("PKG5", 155, 95, "NA"));
 
-        assertEquals(List.of(110, 75), DeliveryTimeEstimationService.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle));
+        assertEquals(List.of(110, 75), DeliveryTimeEstimationServiceImpl.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle));
     }
 
     @Test
@@ -171,10 +171,10 @@ public class DeliveryEstimationTest {
         }).collect(Collectors.toList());
 
         VehicleAssignmentDetails vehicleAssignmentDetails = new VehicleAssignmentDetails(1);
-        List<Integer> maxUnassignedWeights = DeliveryTimeEstimationService.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle);
+        List<Integer> maxUnassignedWeights = DeliveryTimeEstimationServiceImpl.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle);
 
         List<PackageInfo> vehicleAssignmentPackageInfoList = new ArrayList<>();
-        DeliveryTimeEstimationService.getInstance().assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
+        DeliveryTimeEstimationServiceImpl.getInstance().assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
         assertEquals(expectedVehicleAssignmentPackageInfoList, packageInfoList);
 
         expectedVehicleAssignmentPackageInfoList = expectedVehicleAssignmentPackageInfoList.stream().map(packageInfo -> {
@@ -186,7 +186,7 @@ public class DeliveryEstimationTest {
             return packageInfo;
         }).collect(Collectors.toList());
 
-        DeliveryTimeEstimationService.getInstance().assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
+        DeliveryTimeEstimationServiceImpl.getInstance().assignVehicleToPackage(packageInfoList, vehicleAssignmentPackageInfoList, maxUnassignedWeights, vehicleAssignmentDetails);
         assertEquals(expectedVehicleAssignmentPackageInfoList, packageInfoList);
     }
 
@@ -213,15 +213,15 @@ public class DeliveryEstimationTest {
         }).collect(Collectors.toList());
 
         VehicleAssignmentDetails vehicleAssignmentDetails = new VehicleAssignmentDetails(1);
-        List<Integer> maxUnassignedWeights = DeliveryTimeEstimationService.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle);
+        List<Integer> maxUnassignedWeights = DeliveryTimeEstimationServiceImpl.getInstance().getMaxUnassignedWeights(packageInfoList, vehicle);
 
-        DeliveryTimeEstimationService.getInstance().calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, packageInfoList, maxUnassignedWeights, vehicle.getMaxSpeedInKmPerHr());
+        DeliveryTimeEstimationServiceImpl.getInstance().calculateAndUpdateVehicleTimings(vehicleAssignmentDetails, packageInfoList, maxUnassignedWeights, vehicle.getMaxSpeedInKmPerHr());
         assertEquals(expectedVehicleAssignmentPackageInfoList, packageInfoList);
     }
 
     @Test
     public void testGetTwoDigitPrecision() {
-        assertEquals(0.85, DeliveryTimeEstimationService.getInstance().getTwoDigitPrecision(0.85934342), 0);
-        assertEquals(1.42, DeliveryTimeEstimationService.getInstance().getTwoDigitPrecision(1.42454644), 0);
+        assertEquals(0.85, DeliveryTimeEstimationServiceImpl.getInstance().getTwoDigitPrecision(0.85934342), 0);
+        assertEquals(1.42, DeliveryTimeEstimationServiceImpl.getInstance().getTwoDigitPrecision(1.42454644), 0);
     }
 }

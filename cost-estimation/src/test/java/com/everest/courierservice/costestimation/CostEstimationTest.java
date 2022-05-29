@@ -3,7 +3,8 @@ package com.everest.courierservice.costestimation;
 import com.everest.courierservice.core.model.Coupon;
 import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.service.CouponService;
-import com.everest.courierservice.costestimation.service.CostEstimationService;
+import com.everest.courierservice.costestimation.service.CostEstimationServiceImpl;
+import com.everest.courierservice.costestimation.service.DiscountServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 
@@ -32,15 +33,9 @@ public class CostEstimationTest {
     }
 
     @Test
-    public void testEligibilityForDiscount() {
-        assertFalse(CostEstimationService.getInstance().checkIfPackageEligibleForDiscount(packageInfoList.get(0), couponMap));
-        assertTrue(CostEstimationService.getInstance().checkIfPackageEligibleForDiscount(packageInfoList.get(2), couponMap));
-    }
-
-    @Test
     public void testCostEstimation(){
         int baseDeliveryCost = 100;
-        List<PackageInfo> resultCostEstimationPackageInfoList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
+        List<PackageInfo> resultCostEstimationPackageInfoList = CostEstimationServiceImpl.getInstance().findCostEstimation(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
         resultCostEstimationPackageInfoList = resultCostEstimationPackageInfoList.stream().map(expectedCostEstimationPackageInfo -> new PackageInfo(expectedCostEstimationPackageInfo.getPackageId(), expectedCostEstimationPackageInfo.getDiscount(),
                 expectedCostEstimationPackageInfo.getDeliveryCost())).collect(Collectors.toList());
         assertEquals(expectedCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);

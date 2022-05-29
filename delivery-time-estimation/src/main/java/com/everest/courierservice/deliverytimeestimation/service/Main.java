@@ -6,7 +6,7 @@ import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.model.Vehicle;
 import com.everest.courierservice.core.service.CouponService;
 import com.everest.courierservice.core.service.ValidationService;
-import com.everest.courierservice.costestimation.service.CostEstimationService;
+import com.everest.courierservice.costestimation.service.CostEstimationServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -57,11 +57,11 @@ public class Main {
             ValidationService.getInstance().validateInputs(packageInfoList, vehicle, noOfVehicles, baseDeliveryCost, noOfPackages);
 
             // calling cost estimation service to calculate the costs
-            List<PackageInfo> packageInfoResultList = CostEstimationService.getInstance().findCostEstimationForCourierService(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
+            List<PackageInfo> packageInfoResultList = CostEstimationServiceImpl.getInstance().findCostEstimation(packageInfoList, baseDeliveryCost, noOfPackages, couponMap);
             for(PackageInfo packageInfo : packageInfoResultList) {
                 log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
             }
-            packageInfoResultList = DeliveryTimeEstimationService.getInstance().findDeliveryTimeEstimationForCourierService(packageInfoResultList, noOfVehicles, vehicle);
+            packageInfoResultList = DeliveryTimeEstimationServiceImpl.getInstance().findDeliveryTimeEstimation(packageInfoResultList, noOfVehicles, vehicle);
             log.info("===============================================================================================");
             for(PackageInfo packageInfo : packageInfoResultList) {
                 log.info(packageInfo.getPackageId() + " " + packageInfo.getDiscount() + " " + packageInfo.getDeliveryCost() + " " + packageInfo.getEstimatedCostDeliveryTimeInHrs());
