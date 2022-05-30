@@ -28,11 +28,20 @@ public class CouponService {
         initializeCoupon();
     }
 
+    /**
+     *
+     * This method will get the coupon csv file path from properties file and will read the csv file
+     * and construct the coupon object for all coupons
+     *
+     * NOTE: No code change is required for adding new coupons. only need to add new row in csv file then
+     * restart the application
+     *
+     */
     private static void initializeCoupon() {
         try {
-            ConfigurationManager.getInstance().getCouponFilePath();
             String couponFilePath = ConfigurationManager.getInstance().getCouponFilePath();
             if(StringUtils.isBlank(couponFilePath)) throw new ServiceException("coupon file path is empty");
+            log.info("couponFilePath {}", couponFilePath);
             List<Coupon> couponList = CSVUtils.getCouponList(couponFilePath);
             couponMap = couponList.stream().collect(Collectors.toMap(Coupon::getCouponId, Function.identity()));
         } catch (Exception e) {

@@ -11,8 +11,6 @@ import java.util.List;
 @Slf4j
 public class ValidationService {
     private static ValidationService validationService;
-    private boolean[][] dp;
-    private static List<List<Integer>> maxWeights;
 
     private ValidationService() {
 

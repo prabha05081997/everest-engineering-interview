@@ -4,7 +4,6 @@ import com.everest.courierservice.core.model.InputRequestModel;
 import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.model.Vehicle;
 import com.everest.courierservice.core.service.UserInputService;
-import com.everest.courierservice.core.service.ValidationService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -55,7 +54,6 @@ public class UserInputServiceImpl implements UserInputService {
             vehicle = new Vehicle(maxSpeed, maxCarriableWeight);
             log.info("input readed succesfully baseDeliveryCost {} noOfPackages {} noOfVehicles {} packageInfoList {} vehicle {}",
                     baseDeliveryCost, noOfPackages, noOfVehicles, packageInfoList, vehicle);
-            ValidationService.getInstance().validateInputs(packageInfoList, vehicle, noOfVehicles, baseDeliveryCost, noOfPackages);
         } catch (Exception e) {
             log.error("invalid input format found {}", e);
             log.info("Please enter input as below format");

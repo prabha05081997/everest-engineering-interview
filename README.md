@@ -3,10 +3,17 @@
 * Clone the project by **git clone https://github.com/prabha05081997/everest-engineering-interview.git**
 * In root folder run **mvn clean package** and ensure every tests are getting passed
 
+### Coupon
+* Coupons are read from **coupons.csv** file which is placed in root folder of the application.
+* It's path is read from **app.properties** file. so it can be placed anywhere in the system, not
+necessarily in the root folder of the application.
+* New coupons can be added to coupons.csv file then restart the sytem. No code changes are required
+
 ## Cost Estimation Service
 
-Inside cost-estimation module, Go to Main class and run the application and 
-give inputs in below format
+* Inside cost-estimation module, Go to **cost-estimation/target** folder
+* Run the following command **java -jar cost-estimation-1.0-SNAPSHOT.jar**
+to start the application and give inputs in below format
 
 #### Sample input
 
@@ -23,8 +30,9 @@ PKG 35 665
 
 ## Delivery time estimation service
 
-Inside delivery-time-estimation module, Go to Main class and run the application and 
-give inputs in below format
+* Inside delivery-time-estimation module, Go to **delivery-time-estimation/target** folder
+* Run the following command **java -jar delivery-time-estimation-1.0-SNAPSHOT.jar**
+to start the application and give inputs in below format
 
 #### Sample input
 

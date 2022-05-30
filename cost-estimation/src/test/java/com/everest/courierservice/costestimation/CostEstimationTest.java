@@ -4,7 +4,6 @@ import com.everest.courierservice.core.model.Coupon;
 import com.everest.courierservice.core.model.PackageInfo;
 import com.everest.courierservice.core.service.CouponService;
 import com.everest.courierservice.costestimation.service.CostEstimationServiceImpl;
-import com.everest.courierservice.costestimation.service.DiscountServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 

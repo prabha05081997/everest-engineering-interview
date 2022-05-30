@@ -4,7 +4,9 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStream;
 import java.util.Properties;
 
 import static com.everest.courierservice.core.constants.PropertyConstants.*;
@@ -36,9 +38,11 @@ public class ConfigurationManager {
     public void loadConfiguration() {
         log.info("In loadConfiguration");
         try {
-            File file = new File(ConfigurationManager.class.getClassLoader().getResource(APP_PROPERTIES).getFile());
+//            File file = new File(ConfigurationManager.class.getClassLoader().getResource(APP_PROPERTIES).getFile());
+            InputStream file = Thread.currentThread().getContextClassLoader().getResourceAsStream(APP_PROPERTIES);
             properties = new Properties();
-            properties.load(new FileReader(file));
+//            properties.load(new FileReader(file));
+            properties.load(file);
 
             couponFilePath = properties.getProperty(COUPON_FILE_PATH);
         } catch (Exception e) {
