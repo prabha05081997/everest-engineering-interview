@@ -56,7 +56,7 @@ public class ValidationService {
         validateInputs(packageInfoList, baseDeliveryCost, noOfPackages);
     }
 
-    private void validateInputs(List<PackageInfo> packageInfoList, int baseDeliveryCost, int noOfPackages) throws Exception {
+    public void validateInputs(List<PackageInfo> packageInfoList, int baseDeliveryCost, int noOfPackages) throws Exception {
         if(baseDeliveryCost == 0) {
             log.error("base delivery cost should be positive integer");
             throw new InputValidationException("base delivery should be positive integer");

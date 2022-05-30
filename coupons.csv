@@ -1,4 +1,4 @@
 couponId,discountInPercentage,minDistanceInKm,maxDistanceInKm,minWeightInKg,maxWeightInKg
 OFR001,10,0,200,70,200
 OFR002,7,50,150,100,250
-OFR003,5,50,250,10,150a
+OFR003,5,50,250,10,150
