@@ -115,7 +115,31 @@ public class DeliveryEstimationTest {
                 expectedCostEstimationPackageInfo.getDeliveryCost(), expectedCostEstimationPackageInfo.getEstimatedCostDeliveryTimeInHrs())).collect(Collectors.toList());
         assertEquals(expectedVehicleCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);
 
-        // failure case assertion
+        packageInfoList = new ArrayList<>();
+        packageInfoList.add(new PackageInfo("PKG1", 50, 100, "OFR001"));
+        packageInfoList.add(new PackageInfo("PKG2", 50, 100, "OFR008"));
+        packageInfoList.add(new PackageInfo("PKG3", 150, 100, "OFR02"));
+        packageInfoList.add(new PackageInfo("PKG4", 99, 100, "OFR01"));
+        packageInfoList.add(new PackageInfo("PKG5", 100, 100, "NA"));
+
+        vehicle = new Vehicle(70, 200);
+
+        expectedVehicleAssignmentDetailsList = new ArrayList<>();
+        expectedVehicleAssignmentDetailsList.add(new VehicleAssignmentDetails(1));
+
+        expectedVehicleCostEstimationPackageInfoList = new ArrayList<>();
+        expectedVehicleCostEstimationPackageInfoList.add(new PackageInfo("PKG1", 0, 1100, 1.42));
+        expectedVehicleCostEstimationPackageInfoList.add(new PackageInfo("PKG2", 0, 1100, 1.42));
+        expectedVehicleCostEstimationPackageInfoList.add(new PackageInfo("PKG3", 0, 2100, 0));
+        expectedVehicleCostEstimationPackageInfoList.add(new PackageInfo("PKG4", 0, 1590, 0));
+        expectedVehicleCostEstimationPackageInfoList.add(new PackageInfo("PKG5", 0, 1600, 1.42));
+
+        packageInfoResultList = CostEstimationServiceImpl.getInstance().findCostEstimation(packageInfoList, baseDeliveryCost, packageInfoList.size(), couponMap);
+        resultCostEstimationPackageInfoList = DeliveryTimeEstimationServiceImpl.getInstance().assignVehicleToPackages(expectedVehicleAssignmentDetailsList.get(0), packageInfoResultList, vehicle);
+        resultCostEstimationPackageInfoList = resultCostEstimationPackageInfoList.stream().map(expectedCostEstimationPackageInfo -> new PackageInfo(expectedCostEstimationPackageInfo.getPackageId(), expectedCostEstimationPackageInfo.getDiscount(),
+                expectedCostEstimationPackageInfo.getDeliveryCost(), expectedCostEstimationPackageInfo.getEstimatedCostDeliveryTimeInHrs())).collect(Collectors.toList());
+        assertEquals(expectedVehicleCostEstimationPackageInfoList, resultCostEstimationPackageInfoList);
+
     }
 
     @Test
